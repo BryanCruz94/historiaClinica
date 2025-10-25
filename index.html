@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Historia Clínica Mamita</title>
+    <meta name="description"
+        content="Historia clínica multipaciente simple, con adjuntos y acceso admin para edición/borrado.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <div class="container row" style="align-items:center;justify-content:space-between">
+            <div class="inline">
+                <strong>Historia Clínica Mamita</strong>
+                <span class="badge">by: Bryan Cruz</span>
+            </div>
+            <div class="toolbar">
+                <button id="btnAdmin" class="btn">Acceder como admin (Google)</button>
+                <div id="adminInfo" class="muted"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" aria-live="polite">
+        <!-- Selector de Paciente -->
+        <section class="card">
+            <div class="row" style="align-items:flex-end">
+                <div class="col">
+                    <label class="field">
+                        <span class="label">Paciente</span>
+                        <select id="patientSelect"></select>
+                    </label>
+                </div>
+                <!-- Botón solo visible para admin -->
+                <div>
+                    <button id="btnAddPatient" class="btn primary hidden" aria-hidden="true">
+                        + Nuevo paciente
+                    </button>
+                </div>
+                <!-- <div class="kicker">Cualquier persona con el enlace puede ver y crear nuevas entradas.</div> -->
+            </div>
+        </section>
+
+        <!-- Próximas citas -->
+        <!-- <section class="card" id="upcomingBox">
+      <h3 class="title" style="margin-bottom:4px">Próximas citas (14 días)</h3>
+      <div id="upcomingList" class="list"></div>
+      <div class="kicker" id="upcomingEmpty">No hay citas programadas en los próximos 14 días.</div>
+    </section> -->
+
+        <!-- Formulario rápido -->
+        <section class="card">
+            <div class="title">Nueva entrada</div>
+            <div class="tabs" role="tablist" aria-label="Tipo de entrada">
+                <button id="tabAppointment" class="tab active" role="tab" aria-selected="true">Cita</button>
+                <button id="tabExam" class="tab" role="tab" aria-selected="false">Examen</button>
+            </div>
+
+            <!-- Form Cita -->
+            <form id="formAppointment" class="form" autocomplete="off">
+                <div class="row">
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Fecha y hora</span>
+                            <input type="datetime-local" id="ap_datetime" required />
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label inline">Clínica <button type="button" data-add="clinic" class="btn ghost"
+                                    title="Añadir">+</button></span>
+                            <select id="ap_clinic" required></select>
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label inline">Doctor <button type="button" data-add="doctor" class="btn ghost"
+                                    title="Añadir">+</button></span>
+                            <select id="ap_doctor"></select>
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Especialidad</span>
+                            <input id="ap_specialty" placeholder="Ej: Cardiología" />
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Estado</span>
+                            <select id="ap_status" required>
+                                <option value="programada">Programada</option>
+                                <option value="atendida">Atendida</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="field">
+                            <span class="label inline">Acompañante <button type="button" data-add="companion"
+                                    class="btn ghost" title="Añadir">+</button></span>
+                            <select id="ap_companion" required></select>
+                        </label>
+                    </div>
+                    <div class="col" style="flex:2 1 400px">
+                        <label class="field">
+                            <span class="label">Resumen (1–2 párrafos)</span>
+                            <textarea id="ap_summary" maxlength="1500" required></textarea>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
+                            <input id="ap_files" type="file" multiple accept="application/pdf,image/jpeg,image/png" />
+                        </label>
+                        <div id="ap_uploads" class="list"></div>
+                    </div>
+                </div>
+                <div class="inline" style="justify-content:flex-end">
+                    <button class="btn primary" type="submit">Guardar cita</button>
+                </div>
+            </form>
+
+            <!-- Form Examen -->
+            <form id="formExam" class="form hidden" autocomplete="off">
+                <div class="row">
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Fecha y hora</span>
+                            <input type="datetime-local" id="ex_datetime" required />
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label inline">Centro/Lab (usa “Clínicas”) <button type="button"
+                                    data-add="clinic" class="btn ghost" title="Añadir">+</button></span>
+                            <select id="ex_clinic" required></select>
+                        </label>
+                    </div>
+                    <div class="col">
+                        <label class="field">
+                            <span class="label inline">Acompañante <button type="button" data-add="companion"
+                                    class="btn ghost" title="Añadir">+</button></span>
+                            <select id="ex_companion" required></select>
+                        </label>
+                    </div>
+                    <div class="col" style="flex:2 1 400px">
+                        <label class="field">
+                            <span class="label">Comentario (1–2 párrafos)</span>
+                            <textarea id="ex_comment" maxlength="1500" required></textarea>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="field">
+                            <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
+                            <input id="ex_files" type="file" multiple accept="application/pdf,image/jpeg,image/png" />
+                        </label>
+                        <div id="ex_uploads" class="list"></div>
+                    </div>
+                </div>
+                <div class="inline" style="justify-content:flex-end">
+                    <button class="btn primary" type="submit">Guardar examen</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Historial -->
+        <section class="card">
+            <div class="inline" style="justify-content:space-between;align-items:center">
+                <div class="title">Historial médico</div>
+                <div class="kicker">Ordenado desde más reciente</div>
+            </div>
+            <div class="list" id="entriesList" role="list"></div>
+            <div class="inline" style="justify-content:center;margin-top:6px">
+                <button id="btnLoadMore" class="btn">Cargar más</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal visor / detalle -->
+    <div id="viewer" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal">
+            <header class="inline" style="justify-content:space-between">
+                <strong>Detalle</strong>
+                <div class="toolbar">
+                    <button class="btn" id="viewerClose">Cerrar</button>
+                </div>
+            </header>
+            <div class="content" id="viewerContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal catálogo simple -->
+    <div id="catalogModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal">
+            <header class="inline" style="justify-content:space-between">
+                <strong id="catalogTitle">Añadir</strong>
+                <button class="btn" id="catalogClose">Cerrar</button>
+            </header>
+            <div class="content">
+                <form id="catalogForm">
+                    <div class="field">
+                        <span class="label">Nombre</span>
+                        <input id="catalogName" required />
+                    </div>
+                    <div class="field" id="catalogSpecBox">
+                        <span class="label">Especialidad (solo para doctores)</span>
+                        <input id="catalogSpec" />
+                    </div>
+                    <div class="inline" style="justify-content:flex-end">
+                        <button class="btn primary" type="submit">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal edición rápida (admin) -->
+    <div id="editModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal">
+            <header class="inline" style="justify-content:space-between">
+                <strong>Editar entrada</strong>
+                <button class="btn" id="editClose">Cerrar</button>
+            </header>
+            <div class="content">
+                <form id="editForm">
+                    <div class="field">
+                        <span class="label">Estado (solo si es cita)</span>
+                        <select id="edit_status">
+                            <option value="">(sin cambio)</option>
+                            <option value="programada">Programada</option>
+                            <option value="atendida">Atendida</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <span class="label">Resumen/Comentario</span>
+                        <textarea id="edit_text" maxlength="2000"></textarea>
+                    </div>
+                    <div class="inline" style="justify-content:flex-end">
+                        <button class="btn primary" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="toasts" class="toastbox" aria-live="assertive"></div>
+
+    <!-- App -->
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
