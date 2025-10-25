@@ -62,50 +62,87 @@ const maps = {
     companions: new Map()   // id -> {name}
 };
 
+const apDoctorSel = document.getElementById("ap_doctor");
+const apSpecInput = document.getElementById("ap_specialty");
+
+// Marca si el usuario escribió manualmente
+apSpecInput?.addEventListener("input", () => {
+    apSpecInput.dataset.edited = apSpecInput.value ? "1" : "0";
+});
+
+function syncSpecialtyFromDoctor({ force = false } = {}) {
+    if (!apDoctorSel || !apSpecInput) return;
+
+    const id = apDoctorSel.value;
+    const doc = id ? maps.doctors.get(id) : null;
+
+    // No pisar lo que el usuario escribió, salvo que se fuerce
+    if (!force && apSpecInput.dataset.edited === "1") return;
+
+    if (doc && doc.specialty) {
+        apSpecInput.value = doc.specialty;
+        apSpecInput.dataset.edited = "0"; // quedó sincronizado
+    } else if (force) {
+        apSpecInput.value = "";
+        apSpecInput.dataset.edited = "0";
+    }
+}
+
+apDoctorSel?.addEventListener("change", () => {
+    // Cuando el usuario elige un doctor, sincronizamos forzando (pisamos lo anterior)
+    syncSpecialtyFromDoctor({ force: true });
+});
+
+
 const ensureOptionPrompt = (sel, text = "Selecciona...") => {
     sel.innerHTML = "";
     const opt = document.createElement("option"); opt.value = ""; opt.textContent = text; sel.appendChild(opt);
 };
 
 function updateAdminUI() {
-  const btn = document.getElementById("btnAddPatient");
-  if (!btn) return;
-  if (isAdmin) {
-    btn.classList.remove("hidden");
-    btn.removeAttribute("aria-hidden");
-  } else {
-    btn.classList.add("hidden");
-    btn.setAttribute("aria-hidden", "true");
-  }
+    const btn = document.getElementById("btnAddPatient");
+    if (!btn) return;
+    if (isAdmin) {
+        btn.classList.remove("hidden");
+        btn.removeAttribute("aria-hidden");
+    } else {
+        btn.classList.add("hidden");
+        btn.setAttribute("aria-hidden", "true");
+    }
 }
 
 
 async function loadCatalog(name) {
-  const snap = await getDocs(query(collection(db, name), orderBy("name", "asc")));
-  console.log("loadCatalog", name, snap.docs.length);
+    const snap = await getDocs(query(collection(db, name), orderBy("name", "asc")));
+    console.log("loadCatalog", name, snap.docs.length);
 
-  maps[name].clear();
-  const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  for (const it of items) maps[name].set(it.id, it);
+    maps[name].clear();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    for (const it of items) maps[name].set(it.id, it);
 
-  const fill = (sels, fmt) => sels.forEach(sel => {
-    ensureOptionPrompt(sel, "Selecciona...");
-    items.forEach(it => {
-      const opt = document.createElement("option");
-      opt.value = it.id;
-      opt.textContent = fmt(it);
-      sel.appendChild(opt);
+    const fill = (sels, fmt) => sels.forEach(sel => {
+        ensureOptionPrompt(sel, "Selecciona...");
+        items.forEach(it => {
+            const opt = document.createElement("option");
+            opt.value = it.id;
+            opt.textContent = fmt(it);
+            sel.appendChild(opt);
+        });
     });
-  });
 
-  if (name === "clinics")     fill(selects.clinic,     it => it.name);
-  if (name === "companions")  fill(selects.companion,  it => it.name);
-  if (name === "doctors")     fill(selects.doctor,     it => `${it.name}${it.specialty ? " · " + it.specialty : ""}`);
+    if (name === "clinics") fill(selects.clinic, it => it.name);
+    if (name === "companions") fill(selects.companion, it => it.name);
+    if (name === "doctors") {
+        fill(selects.doctor, it => `${it.name}${it.specialty ? " · " + it.specialty : ""}`);
+        // Si ya hay un doctor seleccionado cuando se terminó de cargar el catálogo,
+        // sincroniza la especialidad con el input.
+        syncSpecialtyFromDoctor(); // no fuerza; respeta si el usuario ya escribió
+    }
 
-  // 🔁 Re-pinta la tabla una vez que ya tenemos nombres en memoria
-  renderEntriesCache();
-  // (Opcional) si usas nombres en “Próximas citas”
-  await refreshUpcoming();
+    // 🔁 Re-pinta la tabla una vez que ya tenemos nombres en memoria
+    renderEntriesCache();
+    // (Opcional) si usas nombres en “Próximas citas”
+    await refreshUpcoming();
 }
 
 function nameOf(mapName, id, fallback = "-") {
@@ -357,29 +394,75 @@ const PAGE = 20;
 
 function entryRowTemplate(eid, d) {
     const isAp = d.type === "appointment";
+
+    // Pastilla de tipo
     const typePill = `<span class="pill ${isAp ? 'appointment' : 'exam'}">${isAp ? 'Cita' : 'Examen'}</span>`;
     const status = isAp ? `<span class="status ${d.status || ''}">${d.status || '-'}</span>` : '-';
+
+    // Nombres bonitos de catálogo
     const clinic = nameOf("clinics", d.clinicId);
     const docObj = d.doctorId ? maps.doctors.get(d.doctorId) : null;
     const doctor = docObj ? `${docObj.name}${docObj.specialty ? ' · ' + docObj.specialty : ''}` : (d.doctorSpecialty || '-');
     const comp = nameOf("companions", d.companionId);
+
+    // Resumen corto
     const fullText = isAp ? (d.summary || '') : (d.comment || '');
     const textShort = (fullText).slice(0, 140) + (fullText.length > 140 ? '…' : '');
-    const chips = (d.attachments || []).map((a, i) => `<span class="chip" data-open="${eid}" data-idx="${i}" title="Ver adjunto">${a.contentType.startsWith('image/') ? 'IMG' : 'PDF'} • ${a.name}</span>`).join("");
+
+    // Acortador de nombres de archivo (20 chars)
+    const short = s => {
+        const base = s || '';
+        return base.length > 20 ? base.slice(0, 20) + '…' : base;
+    };
+
+    // Chips de adjuntos con ancho uniforme y nombre truncado
+    const chips = (d.attachments || [])
+        .map((a, i) => {
+            const kind = a.contentType && a.contentType.startsWith('image/') ? 'IMG' : 'PDF';
+            return `<span class="chip file" data-open="${eid}" data-idx="${i}" title="${a.name}">
+                <span class="kind">${kind}</span>
+                <span class="fname">${short(a.name)}</span>
+              </span>`;
+        }).join("");
+
     const adminBtns = isAdmin ? `
     <button class="btn" data-edit="${eid}">Editar</button>
     <button class="btn danger" data-del="${eid}">Eliminar</button>` : ``;
 
+    // Agregamos clase de estilo por tipo de entrada
+    const rowClass = isAp ? 'entry-appointment' : 'entry-exam';
+
     return `
-    <div class="rowcard" role="listitem" data-id="${eid}">
+    <div class="rowcard ${rowClass}" role="listitem" data-id="${eid}">
       <div class="rowgrid">
-        <div><div class="kicker">Fecha/Hora</div><div>${fmtDate(d.dateTime)}</div></div>
-        <div class="hide-sm"><div class="kicker">Clínica/Lab</div><div>${clinic}</div></div>
-        <div class="hide-sm"><div class="kicker">Doctor</div><div>${doctor}</div></div>
-        <div><div class="kicker">Resumen</div><div>${textShort || '-'}</div></div>
-        <div class="hide-sm"><div class="kicker">Acompañante</div><div>${comp}</div></div>
-        <div><div class="kicker">Adjuntos</div><div class="chips">${chips || '<span class="badge">Sin adjuntos</span>'}</div></div>
-        <div><div class="kicker">Tipo</div>${typePill}</div>
+        <div class="date-cell">
+          <div class="kicker">Fecha/Hora</div>
+          <div class="date-val">${fmtDate(d.dateTime)}</div>
+        </div>
+        <div class="hide-sm">
+          <div class="kicker">Clínica/Lab</div>
+          <div>${clinic}</div>
+        </div>
+        <div class="hide-sm">
+          <div class="kicker">Doctor</div>
+          <div>${doctor}</div>
+        </div>
+        <div>
+          <div class="kicker">Resumen</div>
+          <div class="summary-text">${textShort || '-'}</div>
+        </div>
+        <div class="hide-sm">
+          <div class="kicker">Acompañante</div>
+          <div>${comp}</div>
+        </div>
+        <div>
+          <div class="kicker">Adjuntos</div>
+          <div class="chips">${chips || '<span class="badge">Sin adjuntos</span>'}</div>
+        </div>
+        <div>
+          <div class="kicker">Tipo</div>
+          ${typePill}
+        </div>
       </div>
       <div class="inline" style="justify-content:flex-end;margin-top:8px">
         <button class="btn" data-open="${eid}" title="Abrir detalle">Abrir</button>
@@ -389,6 +472,7 @@ function entryRowTemplate(eid, d) {
     </div>
   `;
 }
+
 function renderEntriesCache() {
     listEl.innerHTML = entriesCache.map(({ id, data }) => entryRowTemplate(id, data)).join("");
     listEl.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openViewer(b.getAttribute("data-open")));
@@ -424,10 +508,10 @@ async function subscribeEntries() {
 
 // Cambiar de paciente = (re)leer historial y próximas citas
 async function onPatientChange() {
-  // Los catálogos son globales; no dependen del paciente,
-  // así que solo re-suscribimos historial y refrescamos "Próximas".
-  await subscribeEntries();
-  await refreshUpcoming();
+    // Los catálogos son globales; no dependen del paciente,
+    // así que solo re-suscribimos historial y refrescamos "Próximas".
+    await subscribeEntries();
+    await refreshUpcoming();
 }
 
 async function loadMore() {
@@ -604,23 +688,23 @@ async function deleteEntry(entryId) {
 
 /***** Init *****/
 (async function init() {
-  await loadPatients();
+    await loadPatients();
 
-  // Carga catálogos
-  await Promise.all([
-    loadCatalog("clinics"),
-    loadCatalog("doctors"),
-    loadCatalog("companions")
-  ]);
+    // Carga catálogos
+    await Promise.all([
+        loadCatalog("clinics"),
+        loadCatalog("doctors"),
+        loadCatalog("companions")
+    ]);
 
-  // ✅ En este punto ya hay nombres cargados => re-render
-  renderEntriesCache();
+    // ✅ En este punto ya hay nombres cargados => re-render
+    renderEntriesCache();
 
-  // Autocompletar especialidad al elegir doctor
-  $("#ap_doctor").addEventListener("change", () => {
-    const id = $("#ap_doctor").value;
-    const sp = id ? (maps.doctors.get(id)?.specialty || "") : "";
-    if (sp) $("#ap_specialty").value = sp;
-  });
+    // Autocompletar especialidad al elegir doctor
+    $("#ap_doctor").addEventListener("change", () => {
+        const id = $("#ap_doctor").value;
+        const sp = id ? (maps.doctors.get(id)?.specialty || "") : "";
+        if (sp) $("#ap_specialty").value = sp;
+    });
 })();
 

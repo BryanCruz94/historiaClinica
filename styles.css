@@ -1,47 +1,165 @@
 :root{
-  --bg:#f8faf9; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
-  --prim:#16a34a; --prim-ink:#062b16; --accent:#e2f5e9;
-  --error:#ef4444; --warn:#f59e0b; --ok:#16a34a;
-  --border:#e5e7eb; --shadow:0 2px 8px rgba(16,24,40,.08);
-  --radius:14px; --gap:12px;
+  --bg:#f7f9fb;
+  --card:#ffffff;
+  --ink:#0f172a;
+  --muted:#64748b;
+
+  --prim:#16a34a;        /* verde */
+  --prim-ink:#062b16;
+  --accent:#e2f5e9;
+
+  --error:#ef4444;
+  --warn:#f59e0b;
+  --ok:#16a34a;
+
+  --border:#e5e7eb;
+  --shadow:0 2px 8px rgba(16,24,40,.08);
+  --radius:14px;
+  --gap:12px;
+
+  /* Colores suaves por tipo de entrada */
+  --app-bg: #f4f8ff;     /* azul muy claro citas */
+  --app-border:#e0e9ff;
+  --exam-bg:#fff6ef;     /* durazno muy claro exámenes */
+  --exam-border:#ffe6d3;
+
+  /* Chips */
+  --chip-width: 220px;
 }
+
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif}
+html,body{
+  margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif
+}
 a{color:var(--prim);text-decoration:none}
-header{position:sticky;top:0;z-index:20;background:linear-gradient(0deg, rgba(248,250,249,.4), rgba(248,250,249,.8));backdrop-filter: blur(8px);border-bottom:1px solid var(--border)}
+
+header{
+  position:sticky;top:0;z-index:20;
+  background:linear-gradient(0deg, rgba(248,250,249,.4), rgba(248,250,249,.8));
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border)
+}
+
 .container{max-width:1000px;margin:0 auto;padding:16px}
 .row{display:flex;gap:var(--gap);flex-wrap:wrap}
 .col{flex:1 1 260px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow);padding:14px
+}
+
 .title{font-size:18px;font-weight:700;margin:0 0 8px}
 .muted{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;padding:10px 12px;border-radius:12px;cursor:pointer}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border);background:#fff;
+  padding:10px 12px;border-radius:12px;cursor:pointer
+}
 .btn.primary{background:var(--prim);color:white;border-color:var(--prim)}
 .btn.ghost{background:transparent}
 .btn.warn{background:var(--warn);color:white;border-color:var(--warn)}
 .btn.danger{background:var(--error);color:white;border-color:var(--error)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-select,input,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:12px;background:white;font:inherit}
+
+select,input,textarea{
+  width:100%;padding:10px;border:1px solid var(--border);
+  border-radius:12px;background:white;font:inherit
+}
 textarea{min-height:90px;resize:vertical}
 .field{display:grid;gap:6px;margin-bottom:10px}
 .label{font-size:12px;color:var(--muted)}
+
 .chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{background:var(--accent);border:1px solid #bfe9cf;color:var(--prim-ink);padding:6px 10px;border-radius:999px;font-size:12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+
+/* Chip base */
+.chip{
+  background:var(--accent);
+  border:1px solid #bfe9cf;
+  color:var(--prim-ink);
+  padding:6px 10px;border-radius:999px;
+  font-size:12px;display:inline-flex;align-items:center;gap:6px;
+  cursor:pointer;
+}
+
+/* Chip para archivos con ancho fijo y elipsis */
+.chip.file{
+  width:var(--chip-width);
+  justify-content:flex-start;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.chip.file .kind{
+  font-weight:600;
+}
+.chip.file .fname{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Tabs */
 .tabs{display:flex;border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .tab{flex:1;text-align:center;padding:10px;cursor:pointer;background:#fff}
 .tab.active{background:var(--accent);font-weight:600}
-.table{width:100%;border-collapse:separate;border-spacing:0 8px}
-.rowcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;box-shadow:var(--shadow)}
-/* 7 columnas: Fecha, Tipo, Clínica, Doctor, Acompañante, Texto, Adjuntos */
-.rowgrid{display:grid;grid-template-columns:120px 90px 1fr 1fr 120px 1.4fr 1fr;gap:10px;align-items:center}
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border)}
-.pill.appointment{background:#eef5ff}
-.pill.exam{background:#fff7ee}
+
+/* Fila de historial */
+.rowcard{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  box-shadow:var(--shadow)
+}
+
+/* Estilos por tipo de entrada */
+.rowcard.entry-appointment{
+  background:var(--app-bg);
+  border-color:var(--app-border);
+}
+.rowcard.entry-exam{
+  background:var(--exam-bg);
+  border-color:var(--exam-border);
+}
+
+/* Grid de la fila (Fecha, Clínica, Doctor, Resumen, Acompañante, Adjuntos, Tipo) */
+.rowgrid{
+  display:grid;
+  grid-template-columns:120px 1fr 1fr 1.4fr 1fr 1fr 80px;
+  gap:10px;align-items:center
+}
+
+/* Pastillas */
+.pill{
+  display:inline-block;padding:2px 8px;border-radius:999px;
+  font-size:12px;border:1px solid var(--border)
+}
+.pill.appointment{background:#eaf2ff;border-color:#dbe6ff}
+.pill.exam{background:#fff0e6;border-color:#ffe1cc}
+
+/* Estados */
 .status{font-size:12px}
 .status.programada{color:#2563eb}
 .status.atendida{color:#16a34a}
 .status.cancelada{color:#ef4444}
+
+/* Subtítulos */
 .kicker{font-size:12px;color:var(--muted)}
+
+/* Dar más protagonismo al resumen, bajar jerarquía de la fecha */
+.summary-text{
+  font-size:15px;
+  line-height:1.35;
+}
+.date-cell .date-val{
+  font-size:13px;
+  line-height:1.2;
+  color:#475569; /* ligeramente atenuado */
+}
+
+/* Otros utilitarios */
 .toolbar{display:flex;gap:8px;flex-wrap:wrap}
 .inline{display:flex;gap:8px;align-items:center}
 .list{display:grid;gap:8px;margin-top:8px}
@@ -50,15 +168,33 @@ textarea{min-height:90px;resize:vertical}
 .hidden{display:none !important}
 .divider{height:1px;background:var(--border);margin:8px 0}
 .badge{font-size:11px;color:var(--muted)}
+
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:90;padding:16px}
 .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);max-width:800px;width:100%;max-height:90vh;overflow:auto}
 .modal header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px}
 .modal .content{padding:12px 16px}
+
 .embed{width:100%;height:65vh;border:1px solid var(--border);border-radius:12px}
 .thumb{max-height:28px;border-radius:6px;border:1px solid var(--border)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media (max-width:920px){.rowgrid{grid-template-columns:110px 72px 1fr 1fr 100px 1.2fr 1fr}}
-@media (max-width:720px){.rowgrid{grid-template-columns:100px 64px 1fr 1fr 86px 1fr 1fr}.hide-sm{display:none}}
-@media (max-width:560px){.rowgrid{grid-template-columns:92px 60px 1fr 1fr 80px 1fr 1fr}}
+
+/* Responsivo */
+@media (max-width:920px){
+  .rowgrid{
+    grid-template-columns:110px 1fr 1fr 1.2fr 1fr 1fr 70px
+  }
+}
+@media (max-width:720px){
+  .rowgrid{
+    grid-template-columns:100px 1fr 1fr 1fr 1fr 1fr 64px
+  }
+  .hide-sm{display:none}
+}
+@media (max-width:560px){
+  .rowgrid{
+    grid-template-columns:92px 1fr 1fr 1fr 1fr 1fr 60px
+  }
+}
+
 /* Ocultar campo especialidad en modal catálogo salvo doctores (app.js lo alterna) */
 #catalogSpecBox{display:none}
