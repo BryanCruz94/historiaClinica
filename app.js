@@ -82,6 +82,7 @@ function updateAdminUI() {
 
 async function loadCatalog(name) {
   const snap = await getDocs(query(collection(db, name), orderBy("name", "asc")));
+  console.log("loadCatalog", name, snap.docs.length);
 
   maps[name].clear();
   const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
