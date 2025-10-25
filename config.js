@@ -15,7 +15,11 @@ export const ADMIN_EMAILS = [
 ];
 
 export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-export const ALLOWED_TYPES = ["application/pdf","image/jpeg","image/png"];
+export const ALLOWED_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png"
+];
 
 
 
