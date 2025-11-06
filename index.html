@@ -177,7 +177,12 @@
         <section class="card">
             <div class="inline" style="justify-content:space-between;align-items:center">
                 <div class="title">Historial médico</div>
-                <div class="kicker">Ordenado desde más reciente</div>
+                <div class="inline" style="gap:8px;align-items:center">
+                    <div class="kicker">Ordenado desde más reciente</div>
+                    <button id="btnReport" class="btn pdf">
+                        <span class="icon">📄</span> Generar reporte
+                    </button>
+                </div>
             </div>
             <div class="list" id="entriesList" role="list"></div>
             <div class="inline" style="justify-content:center;margin-top:6px">

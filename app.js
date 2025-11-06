@@ -9,8 +9,50 @@ import {
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js';
 
 import { firebaseConfig, ADMIN_EMAILS, MAX_FILE_SIZE, ALLOWED_TYPES } from './config.js';
+import { openReportWindow } from './report.js';
+
 
 console.log("app.js cargado ✅");
+
+
+
+/***** Reporte *****/
+async function generateReport() {
+  if (!currentPatientId) { toast("Selecciona un paciente", "warn"); return; }
+
+  const patientName =
+    selPatient.options[selPatient.selectedIndex]?.textContent || "(sin nombre)";
+  const generatedAt = new Date().toLocaleString();
+
+  // Trae TODO el historial de ese paciente, antiguo -> reciente
+  const qAll = query(
+    collection(db, "patients", currentPatientId, "entries"),
+    orderBy("dateTime", "asc")
+  );
+  const snap = await getDocs(qAll);
+
+  const rows = snap.docs.map((docSnap) => {
+    const v = docSnap.data();
+    const clinic = nameOf("clinics", v.clinicId);
+    const docObj = v.doctorId ? maps.doctors.get(v.doctorId) : null;
+    const doctor = docObj
+      ? `${docObj.name}${docObj.specialty ? " · " + docObj.specialty : ""}`
+      : (v.doctorSpecialty || "-");
+    const resumen = v.type === "appointment" ? (v.summary || "") : (v.comment || "");
+    const anexos = (v.attachments || []).map(a => a.name).join(", ");
+
+    return {
+      fecha: fmtDate(v.dateTime),
+      clinica: clinic,
+      doctor,
+      resumen,
+      anexos,
+    };
+  });
+
+  openReportWindow({ patientName, generatedAt, rows });
+}
+/* fin de reporte */
 
 /***** Init *****/
 const app = initializeApp(firebaseConfig);
@@ -706,5 +748,8 @@ async function deleteEntry(entryId) {
         const sp = id ? (maps.doctors.get(id)?.specialty || "") : "";
         if (sp) $("#ap_specialty").value = sp;
     });
+    
 })();
+document.getElementById("btnReport")?.addEventListener("click", generateReport);
+
 
