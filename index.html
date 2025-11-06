@@ -53,125 +53,137 @@
 
         <!-- Formulario rápido -->
         <section class="card">
-            <div class="title">Nueva entrada</div>
-            <div class="tabs" role="tablist" aria-label="Tipo de entrada">
-                <button id="tabAppointment" class="tab active" role="tab" aria-selected="true">Cita</button>
-                <button id="tabExam" class="tab" role="tab" aria-selected="false">Examen</button>
-            </div>
+            <details id="accNew" class="accordion">
+                <summary>
+                    <div class="acc-head">
+                        <span class="title">Nueva entrada</span>
+                        <span class="muted">Cita o Examen</span>
+                    </div>
+                    <span class="chev" aria-hidden="true"></span>
+                </summary>
 
-            <!-- Form Cita -->
-            <form id="formAppointment" class="form" autocomplete="off">
-                <div class="row">
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Fecha y hora</span>
-                            <input type="datetime-local" id="ap_datetime" required />
-                        </label>
+                <div class="acc-content">
+                    <div class="tabs" role="tablist" aria-label="Tipo de entrada">
+                        <button id="tabAppointment" class="tab active" role="tab" aria-selected="true">Cita</button>
+                        <button id="tabExam" class="tab" role="tab" aria-selected="false">Examen</button>
                     </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label inline">Clínica <button type="button" data-add="clinic" class="btn ghost"
-                                    title="Añadir">+</button></span>
-                            <select id="ap_clinic" required></select>
-                        </label>
-                    </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label inline">Doctor <button type="button" data-add="doctor" class="btn ghost"
-                                    title="Añadir">+</button></span>
-                            <select id="ap_doctor"></select>
-                        </label>
-                    </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Especialidad</span>
-                            <input id="ap_specialty" placeholder="Ej: Cardiología" />
-                        </label>
-                    </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Estado</span>
-                            <select id="ap_status" required>
-                                <option value="programada">Programada</option>
-                                <option value="atendida">Atendida</option>
-                                <option value="cancelada">Cancelada</option>
-                            </select>
-                        </label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="field">
-                            <span class="label inline">Acompañante <button type="button" data-add="companion"
-                                    class="btn ghost" title="Añadir">+</button></span>
-                            <select id="ap_companion" required></select>
-                        </label>
-                    </div>
-                    <div class="col" style="flex:2 1 400px">
-                        <label class="field">
-                            <span class="label">Resumen (1–2 párrafos)</span>
-                            <textarea id="ap_summary" maxlength="1500" required></textarea>
-                        </label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
-                            <input id="ap_files" type="file" multiple accept=".pdf,application/pdf,image/*" />
-                        </label>
-                        <div id="ap_uploads" class="list"></div>
-                    </div>
-                </div>
-                <div class="inline" style="justify-content:flex-end">
-                    <button class="btn primary" type="submit">Guardar cita</button>
-                </div>
-            </form>
 
-            <!-- Form Examen -->
-            <form id="formExam" class="form hidden" autocomplete="off">
-                <div class="row">
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Fecha y hora</span>
-                            <input type="datetime-local" id="ex_datetime" required />
-                        </label>
-                    </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label inline">Centro/Lab (usa “Clínicas”) <button type="button"
-                                    data-add="clinic" class="btn ghost" title="Añadir">+</button></span>
-                            <select id="ex_clinic" required></select>
-                        </label>
-                    </div>
-                    <div class="col">
-                        <label class="field">
-                            <span class="label inline">Acompañante <button type="button" data-add="companion"
-                                    class="btn ghost" title="Añadir">+</button></span>
-                            <select id="ex_companion" required></select>
-                        </label>
-                    </div>
-                    <div class="col" style="flex:2 1 400px">
-                        <label class="field">
-                            <span class="label">Comentario (1–2 párrafos)</span>
-                            <textarea id="ex_comment" maxlength="1500" required></textarea>
-                        </label>
-                    </div>
+                    <!-- Form Cita -->
+                    <form id="formAppointment" class="form" autocomplete="off">
+                        <div class="row">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Fecha y hora</span>
+                                    <input type="datetime-local" id="ap_datetime" required />
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label inline">Clínica <button type="button" data-add="clinic"
+                                            class="btn ghost" title="Añadir">+</button></span>
+                                    <select id="ap_clinic" required></select>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label inline">Doctor <button type="button" data-add="doctor"
+                                            class="btn ghost" title="Añadir">+</button></span>
+                                    <select id="ap_doctor"></select>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Especialidad</span>
+                                    <input id="ap_specialty" placeholder="Ej: Cardiología" />
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Estado</span>
+                                    <select id="ap_status" required>
+                                        <option value="programada">Programada</option>
+                                        <option value="atendida">Atendida</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label inline">Acompañante <button type="button" data-add="companion"
+                                            class="btn ghost" title="Añadir">+</button></span>
+                                    <select id="ap_companion" required></select>
+                                </label>
+                            </div>
+                            <div class="col" style="flex:2 1 400px">
+                                <label class="field">
+                                    <span class="label">Resumen (1–2 párrafos)</span>
+                                    <textarea id="ap_summary" maxlength="1500" required></textarea>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
+                                    <input id="ap_files" type="file" multiple accept=".pdf,application/pdf,image/*" />
+                                </label>
+                                <div id="ap_uploads" class="list"></div>
+                            </div>
+                        </div>
+                        <div class="inline" style="justify-content:flex-end">
+                            <button class="btn primary" type="submit">Guardar cita</button>
+                        </div>
+                    </form>
+
+                    <!-- Form Examen -->
+                    <form id="formExam" class="form hidden" autocomplete="off">
+                        <div class="row">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Fecha y hora</span>
+                                    <input type="datetime-local" id="ex_datetime" required />
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label inline">Centro/Lab (usa “Clínicas”) <button type="button"
+                                            data-add="clinic" class="btn ghost" title="Añadir">+</button></span>
+                                    <select id="ex_clinic" required></select>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label inline">Acompañante <button type="button" data-add="companion"
+                                            class="btn ghost" title="Añadir">+</button></span>
+                                    <select id="ex_companion" required></select>
+                                </label>
+                            </div>
+                            <div class="col" style="flex:2 1 400px">
+                                <label class="field">
+                                    <span class="label">Comentario (1–2 párrafos)</span>
+                                    <textarea id="ex_comment" maxlength="1500" required></textarea>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
+                                    <input id="ex_files" type="file" multiple accept=".pdf,application/pdf,image/*" />
+                                </label>
+                                <div id="ex_uploads" class="list"></div>
+                            </div>
+                        </div>
+                        <div class="inline" style="justify-content:flex-end">
+                            <button class="btn primary" type="submit">Guardar examen</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="row">
-                    <div class="col">
-                        <label class="field">
-                            <span class="label">Adjuntos (PDF/JPG/PNG, máx 20MB c/u)</span>
-                            <input id="ex_files" type="file" multiple accept=".pdf,application/pdf,image/*" />
-                        </label>
-                        <div id="ex_uploads" class="list"></div>
-                    </div>
-                </div>
-                <div class="inline" style="justify-content:flex-end">
-                    <button class="btn primary" type="submit">Guardar examen</button>
-                </div>
-            </form>
+            </details>
         </section>
+
 
         <!-- Historial -->
         <section class="card">
@@ -179,16 +191,71 @@
                 <div class="title">Historial médico</div>
                 <div class="inline" style="gap:8px;align-items:center">
                     <div class="kicker">Ordenado desde más reciente</div>
-                    <button id="btnReport" class="btn pdf">
-                        <span class="icon">📄</span> Generar reporte
-                    </button>
+                    <button id="btnReport" class="btn pdf"><span class="icon">📄</span> Generar reporte</button>
                 </div>
             </div>
+
+            <details id="accFilters" class="accordion">
+                <summary>
+                    <div class="acc-head">
+                        <strong>Filtros</strong>
+                        <span id="filterBadge" class="badge">0 activos</span>
+                    </div>
+                    <span class="chev" aria-hidden="true"></span>
+                </summary>
+
+                <div class="acc-content">
+                    <div class="filters">
+                        <div class="row" style="align-items:flex-end">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Desde</span>
+                                    <input type="date" id="f_from">
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Hasta</span>
+                                    <input type="date" id="f_to">
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Clínica</span>
+                                    <select id="f_clinic"></select>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Doctor</span>
+                                    <select id="f_doctor"></select>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="label">Tipo</span>
+                                    <select id="f_type">
+                                        <option value="">Todos</option>
+                                        <option value="appointment">Cita</option>
+                                        <option value="exam">Examen</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="col" style="flex:0 0 160px">
+                                <button id="f_clear" class="btn ghost">Limpiar filtros</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
             <div class="list" id="entriesList" role="list"></div>
             <div class="inline" style="justify-content:center;margin-top:6px">
                 <button id="btnLoadMore" class="btn">Cargar más</button>
             </div>
         </section>
+
+
     </main>
 
     <!-- Modal visor / detalle -->
