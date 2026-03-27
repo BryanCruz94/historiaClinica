@@ -849,7 +849,8 @@ const upcomingEmpty = $("#upcomingEmpty");
 
 /** Consulta próximas citas (programadas) en 14 días y las lista */
 async function refreshUpcoming() {
-  upcomingList.innerHTML = "";
+  if (!upcomingList && !upcomingEmpty) return;
+  if (upcomingList) upcomingList.innerHTML = "";
   if (!currentPatientId) { upcomingEmpty?.classList.remove("hidden"); return; }
 
   const now = Timestamp.fromDate(new Date());
@@ -869,6 +870,7 @@ async function refreshUpcoming() {
     if (snap.empty) { upcomingEmpty?.classList.remove("hidden"); return; }
     upcomingEmpty?.classList.add("hidden");
 
+    if (!upcomingList) return;
     snap.forEach(d => {
       const v = d.data();
       const clinicName = nameOf("clinics", v.clinicId);

@@ -111,7 +111,12 @@ textarea{min-height:90px;resize:vertical}
   border:1px solid var(--border);
   border-radius:12px;
   padding:12px;
-  box-shadow:var(--shadow)
+  box-shadow:var(--shadow);
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.rowcard:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(16,24,40,.12);
 }
 
 /* Estilos por tipo de entrada */
@@ -128,7 +133,14 @@ textarea{min-height:90px;resize:vertical}
 .rowgrid{
   display:grid;
   grid-template-columns:120px 1fr 1fr 1.4fr 1fr 1fr 80px;
-  gap:10px;align-items:center
+  gap:10px;
+  align-items:stretch;
+}
+.rowgrid > div{
+  background:rgba(255,255,255,.72);
+  border:1px solid #eef2f7;
+  border-radius:10px;
+  padding:8px;
 }
 
 /* Pastillas */
@@ -181,7 +193,8 @@ textarea{min-height:90px;resize:vertical}
 /* Responsivo */
 @media (max-width:920px){
   .rowgrid{
-    grid-template-columns:110px 1fr 1fr 1.2fr 1fr 1fr 70px
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
 }
 @media (max-width:720px){
