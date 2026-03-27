@@ -185,14 +185,30 @@ textarea{min-height:90px;resize:vertical}
   }
 }
 @media (max-width:720px){
+  .container { padding: 12px; }
+  header .container { gap: 10px; }
+  .toolbar { width: 100%; }
+  .toolbar .btn,
+  .toolbar #adminInfo { width: 100%; }
+  .inline { flex-wrap: wrap; }
+  .btn { min-height: 44px; }
+  .field { margin-bottom: 6px; }
+
   .rowgrid{
-    grid-template-columns:100px 1fr 1fr 1fr 1fr 1fr 64px
+    grid-template-columns:1fr 1fr;
+    gap: 8px;
   }
-  .hide-sm{display:none}
+  .hide-sm{display:block}
 }
 @media (max-width:560px){
+  .card { padding: 10px; }
+  .tabs { flex-direction: column; }
+  .tab { border-bottom: 1px solid var(--border); }
+  .tab:last-child { border-bottom: 0; }
+  .row > .col,
+  .row > div { flex: 1 1 100% !important; }
   .rowgrid{
-    grid-template-columns:92px 1fr 1fr 1fr 1fr 1fr 60px
+    grid-template-columns:1fr;
   }
 }
 

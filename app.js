@@ -76,6 +76,8 @@ let currentUser = null;
 let isAdmin = false;
 let currentPatientId = null;
 
+const patientCatalogPath = (name) => collection(db, "patients", currentPatientId, name);
+
 let entriesUnsub = null;
 let lastEntryCursor = null;
 let entriesCache = [];
@@ -174,14 +176,21 @@ function updateAdminUI() {
  * - Re-renderear historial y próximas
  */
 async function loadCatalog(name) {
-  const snap = await getDocs(query(collection(db, name), orderBy("name", "asc")));
   maps[name].clear();
 
+  if (!currentPatientId) {
+    selects[name.slice(0, -1)]?.forEach(sel => ensureOptionPrompt(sel, "Selecciona..."));
+    populateFiltersFor(name);
+    return;
+  }
+
+  const snap = await getDocs(query(patientCatalogPath(name), orderBy("name", "asc")));
   const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   for (const it of items) maps[name].set(it.id, it);
 
   // Rellena selects del formulario
   const fill = (sels, fmt) => sels.forEach(sel => {
+    const previousValue = sel.value;
     ensureOptionPrompt(sel, "Selecciona...");
     items.forEach(it => {
       const opt = document.createElement("option");
@@ -189,24 +198,21 @@ async function loadCatalog(name) {
       opt.textContent = fmt(it);
       sel.appendChild(opt);
     });
+    if (previousValue && items.some(it => it.id === previousValue)) {
+      sel.value = previousValue;
+    }
   });
 
-  if (name === "clinics")   fill(selects.clinic, it => it.name);
+  if (name === "clinics") fill(selects.clinic, it => it.name);
   if (name === "companions") fill(selects.companion, it => it.name);
   if (name === "doctors") {
     fill(selects.doctor, it => `${it.name}${it.specialty ? " · " + it.specialty : ""}`);
-    // Si al terminar ya hay doctor seleccionado, sincroniza especialidad (sin forzar)
     syncSpecialtyFromDoctor();
   }
 
-  // Pobla selects de filtros según el catálogo cargado
   populateFiltersFor(name);
-
-  // Re-render de historial y próximas
   renderEntriesCache();
   await refreshUpcoming();
-
-  // Refresca badge de filtros
   updateFilterBadge();
 }
 
@@ -237,6 +243,15 @@ function nameOf(mapName, id, fallback = "-") {
   return it.name || fallback;
 }
 
+
+
+async function loadPatientCatalogs() {
+  await Promise.all([
+    loadCatalog("clinics"),
+    loadCatalog("doctors"),
+    loadCatalog("companions")
+  ]);
+}
 
 /* ============================================================================
    8) Filtros: lectura, aplicación y badge
@@ -458,9 +473,10 @@ $("#catalogForm").addEventListener("submit", async (e) => {
   if (colName === "doctors") data.specialty = catalogSpec.value.trim() || null;
 
   try {
-    await addDoc(collection(db, colName), data);
+    if (!currentPatientId) { toast("Selecciona un paciente para crear catálogos", "warn"); return; }
+    await addDoc(patientCatalogPath(colName), data);
     toast("Añadido al catálogo", "ok");
-    await Promise.all([loadCatalog("clinics"), loadCatalog("doctors"), loadCatalog("companions")]);
+    await loadPatientCatalogs();
     closeCatalogModal();
   } catch (err) {
     console.error(err);
@@ -799,6 +815,7 @@ async function subscribeEntries() {
 
 /** Al cambiar paciente, re-suscribe historial y refresca próximas */
 async function onPatientChange() {
+  await loadPatientCatalogs();
   await subscribeEntries();
   await refreshUpcoming();
 }
@@ -1084,16 +1101,9 @@ function rememberAccordion(id) {
    23) Init principal
    ============================================================================ */
 (async function init() {
-  // Pacientes y catálogos
+  // Pacientes y catálogos por paciente
   await loadPatients();
-  await Promise.all([
-    loadCatalog("clinics"),
-    loadCatalog("doctors"),
-    loadCatalog("companions")
-  ]);
-
-  // En este punto ya hay nombres cargados => re-render
-  renderEntriesCache();
+  await onPatientChange();
 
   // Autocompletar especialidad al elegir doctor (por seguridad, ya tenemos el addEventListener arriba)
   $("#ap_doctor").addEventListener("change", () => {

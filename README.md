@@ -1,4 +1,4 @@
-Historia Clínica Mamita
+Sistema Artemisa - Historias Clínicas
 
 Aplicación web para el registro y gestión de historias clínicas de pacientes, desarrollada con Firebase (Firestore, Auth y Storage) y JavaScript modular con ES6.
 Permite a un administrador registrar pacientes, citas y exámenes médicos, así como adjuntar archivos relacionados (PDF, imágenes, etc.).
