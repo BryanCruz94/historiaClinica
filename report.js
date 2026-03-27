@@ -31,13 +31,17 @@ export function openReportWindow({ patientName, generatedAt, rows }) {
     .header { margin-bottom: 16px; }
     .title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
     .meta  { color:#64748b; font-size: 12px; }
-    .card  { border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
-    table { width:100%; border-collapse:collapse; table-layout: fixed; font-size:12px; }
+    .card  { border:1px solid #e5e7eb; border-radius:10px; padding:14px; overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; table-layout: fixed; font-size:12px; min-width:760px; }
     col { width:20%; } /* 5 columnas simétricas */
     thead th { background:#f3f4f6; font-weight:700; text-align:left; }
     th, td { border:1px solid #e5e7eb; padding:8px 10px; vertical-align:top; word-wrap:break-word; overflow-wrap:anywhere; }
     tbody tr:nth-child(even) { background:#fafafa; }
     .footer { margin-top: 10px; color:#94a3b8; font-size:11px; text-align:right; }
+    @media (max-width: 768px) {
+      .title { font-size: 18px; }
+      .meta { font-size: 11px; }
+    }
   `;
 
   const html = `<!doctype html>
@@ -73,7 +77,7 @@ export function openReportWindow({ patientName, generatedAt, rows }) {
     </table>
   </div>
 
-  <div class="footer">Historia Clínica Mamita</div>
+  <div class="footer">Sistema Artemisa - Historias Clínicas</div>
   <script>
     // Dispara el diálogo de impresión (Guardar como PDF)
     window.addEventListener('load', () => {
