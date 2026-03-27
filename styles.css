@@ -212,10 +212,6 @@ textarea{min-height:90px;resize:vertical}
     gap: 8px;
   }
   .hide-sm{display:block}
-  .rowcard .inline[style*="justify-content:flex-end"]{
-    justify-content:flex-start !important;
-    margin-top:10px;
-  }
 }
 @media (max-width:560px){
   .card { padding: 10px; }
@@ -226,13 +222,6 @@ textarea{min-height:90px;resize:vertical}
   .row > div { flex: 1 1 100% !important; }
   .rowgrid{
     grid-template-columns:1fr;
-  }
-  .rowgrid > div{
-    padding:10px;
-  }
-  .chips .chip.file{
-    width:100%;
-    max-width:100%;
   }
 }
 
