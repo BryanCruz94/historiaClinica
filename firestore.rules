@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email in [
+               "brayuco03@gmail.com"
+             ];
+    }
+
+    // Lectura pública
+    match /{document=**} {
+      allow read: if true;
+    }
+
+    // Pacientes
+    match /patients/{patientId} {
+      allow create: if true;
+      allow update, delete: if isAdmin();
+
+      // Catálogos exclusivos por paciente
+      match /clinics/{id} {
+        allow create: if true;
+        allow update, delete: if isAdmin();
+      }
+
+      match /doctors/{id} {
+        allow create: if true;
+        allow update, delete: if isAdmin();
+      }
+
+      match /companions/{id} {
+        allow create: if true;
+        allow update, delete: if isAdmin();
+      }
+
+      // Entradas
+      match /entries/{entryId} {
+        allow create: if
+          request.resource.data.type in ["appointment","exam"] &&
+          request.resource.data.dateTime is timestamp;
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}
