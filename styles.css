@@ -132,7 +132,7 @@ textarea{min-height:90px;resize:vertical}
 /* Grid de la fila (Fecha, Clínica, Doctor, Resumen, Acompañante, Adjuntos, Tipo) */
 .rowgrid{
   display:grid;
-  grid-template-columns:120px 1fr 1fr 1.4fr 1fr 1fr 80px;
+  grid-template-columns:120px 1fr 1fr 1.4fr 1fr 80px;
   gap:10px;
   align-items:stretch;
 }

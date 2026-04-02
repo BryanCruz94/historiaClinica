@@ -746,10 +746,6 @@ function entryRowTemplate(eid, d) {
           <div>${comp}</div>
         </div>
         <div>
-          <div class="kicker">Adjuntos</div>
-          <div class="chips">${chips || '<span class="badge">Sin adjuntos</span>'}</div>
-        </div>
-        <div>
           <div class="kicker">Tipo</div>
           ${typePill}
         </div>
