@@ -2,45 +2,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isAdmin() {
-      return request.auth != null &&
-             request.auth.token.email in [
-               "brayuco03@gmail.com"
-             ];
+      return isSignedIn() && request.auth.token.email in ["brayuco03@gmail.com"];
     }
 
-    // Lectura pública
-    match /{document=**} {
-      allow read: if true;
+    function ownPatient(patientId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/patients/$(patientId)).data.ownerUid == request.auth.uid;
     }
 
-    // Pacientes
+    match /users/{userId} {
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow read, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
     match /patients/{patientId} {
-      allow create: if true;
-      allow update, delete: if isAdmin();
+      allow create: if isSignedIn();
+      allow read, update: if ownPatient(patientId) || isAdmin();
+      allow delete: if isAdmin();
 
-      // Catálogos exclusivos por paciente
       match /clinics/{id} {
-        allow create: if true;
-        allow update, delete: if isAdmin();
+        allow read, write: if ownPatient(patientId) || isAdmin();
       }
 
       match /doctors/{id} {
-        allow create: if true;
-        allow update, delete: if isAdmin();
+        allow read, write: if ownPatient(patientId) || isAdmin();
       }
 
       match /companions/{id} {
-        allow create: if true;
-        allow update, delete: if isAdmin();
+        allow read, write: if ownPatient(patientId) || isAdmin();
       }
 
-      // Entradas
       match /entries/{entryId} {
-        allow create: if
-          request.resource.data.type in ["appointment","exam"] &&
-          request.resource.data.dateTime is timestamp;
-        allow update, delete: if isAdmin();
+        allow read, write: if (ownPatient(patientId) || isAdmin()) &&
+          request.resource.data.type in ["appointment", "exam"];
       }
     }
   }
