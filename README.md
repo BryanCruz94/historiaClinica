@@ -1,99 +1,66 @@
-Sistema Artemisa - Historias Clínicas
+# Sistema Artemisa (Migración React)
 
-Aplicación web para el registro y gestión de historias clínicas de pacientes, desarrollada con Firebase (Firestore, Auth y Storage) y JavaScript modular con ES6.
-Permite a un administrador registrar pacientes, citas y exámenes médicos, así como adjuntar archivos relacionados (PDF, imágenes, etc.).
+Aplicación migrada a React con arquitectura orientada a componentes, autenticación por usuario y panel admin.
 
-Descripción general
+## ¿Necesito instalar Node?
+No es obligatorio.
 
-Este sistema está diseñado para que los usuarios puedan consultar la información médica de manera estructurada y segura.
-El administrador puede añadir nuevos pacientes, registrar citas y exámenes, y gestionar los catálogos de doctores, clínicas y acompañantes.
+Este proyecto está hecho con **módulos ESM en navegador** y carga React/Tailwind por CDN.
+Por eso **no existe `package.json` ni `node_modules`** en esta versión.
 
-El proyecto se basa en una arquitectura totalmente client-side con conexión directa a los servicios de Firebase, sin necesidad de backend intermedio.
+## Cómo ejecutar el programa
+> Importante: debes abrirlo con servidor HTTP (no con doble click al `index.html`).
 
-Características principales
+### Opción A (recomendada): Python (sin Node)
+Si tienes Python instalado:
 
-Autenticación con Google (solo para administradores)
-Control de acceso a funciones críticas, como la creación de pacientes o edición de datos.
+```bash
+cd /workspace/historiaClinica
+python3 -m http.server 5173
+```
 
-Gestión de pacientes
-Cada paciente tiene un subdocumento en Firestore donde se almacenan sus entradas médicas.
+Luego abre:
 
-Historial clínico
-Visualización ordenada de citas y exámenes con campos de fecha, clínica, doctor, acompañante, resumen o comentario, y adjuntos.
+- http://localhost:5173
 
-Subida y descarga de archivos
-Integración con Firebase Storage para documentos en PDF, imágenes JPG o PNG.
+### Opción B: Node (si prefieres usar Node)
+Si ya tienes Node instalado:
 
-Catálogos dinámicos
-Administración de listas de doctores, clínicas y acompañantes mediante formularios, con actualización en tiempo real.
+```bash
+cd /workspace/historiaClinica
+npx serve -l 5173 .
+```
 
-Control de permisos
-Solo el administrador puede crear pacientes o eliminar registros.
-Los usuarios con acceso al enlace pueden consultar la información disponible.
+Luego abre:
 
-Estructura del proyecto
-/public
-│
-├── index.html          # Interfaz principal
-├── app.js              # Lógica del cliente, conexión con Firebase
-├── config.js           # Configuración de Firebase y constantes
-├── style.css           # Estilos principales
-└── assets/             # Íconos, logotipos u otros recursos
+- http://localhost:5173
 
-Dependencias
+## Requisitos de Firebase
+Para que funcione completamente (auth, datos y privacidad):
 
-Firebase v10.13.1 (CDN modular)
+1. Configura en Firebase Authentication:
+   - Email/Password habilitado.
+   - Google Provider habilitado.
+2. Usa las reglas de `firestore.rules` incluidas en este repo.
+3. Asegura que el admin sea el correo:
+   - `brayuco03@gmail.com`
 
-HTML5 / CSS3
+## Cambios principales
+- Front-end reescrito en React (sin build step, usando módulos ESM en navegador).
+- Login de usuarios por **usuario + contraseña** y registro automático.
+- Login exclusivo de administrador con **Google Provider**.
+- Aislamiento de información por usuario/paciente mediante `ownerUid`.
+- Panel de administración para activar/desactivar y eliminar usuarios.
+- Migración de pacientes legacy a usuarios con patrón `primerNombre + inicialApellido` y password `123456`.
+- CRUD de citas y exámenes, filtros y reporte imprimible.
 
-JavaScript ES6+
+## Estructura
+- `src/App.js`: composición principal de componentes.
+- `src/components/*`: UI reusable.
+- `src/services/firebase.js`: autenticación y usuarios.
+- `src/services/dataService.js`: catálogos y entradas clínicas.
+- `src/utils/report.js`: impresión por filtros.
+- `firestore.rules`: reglas propuestas para privacidad por usuario.
 
-Configuración inicial
-
-Crear un proyecto en Firebase Console.
-
-Habilitar los siguientes servicios:
-
-Firestore Database
-
-Authentication (con proveedor Google)
-
-Firebase Storage
-
-Copiar las credenciales del proyecto en el archivo config.js:
-
-export const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
-
-
-En la misma configuración, define los correos de administradores:
-
-export const ADMIN_EMAILS = ["correo@ejemplo.com"];
-
-
-Desplegar el sitio con Firebase Hosting o cualquier servidor estático.
-
-Seguridad y reglas de Firestore
-
-Asegúrate de restringir la creación de pacientes únicamente a los administradores.
-Ejemplo de regla básica:
-
-match /patients/{id} {
-  allow read: if true;
-  allow create, update, delete: if request.auth != null
-    && request.auth.token.email in ["correo@ejemplo.com"];
-}
-
-Créditos y autoría
-
-Este proyecto fue desarrollado con apoyo de inteligencia artificial para la generación, refactorización y documentación del código.
-La integración, depuración y personalización final fueron realizadas manualmente por el desarrollador principal.
-
-Autor: Bryan Cruz
-Colaborador: Asistencia técnica generada con IA
+## Importante
+Debes desplegar las nuevas reglas de Firestore para que la privacidad quede activa.
