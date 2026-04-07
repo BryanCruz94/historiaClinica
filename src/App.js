@@ -10,6 +10,7 @@ import {
   createLegacyUsersForPatients,
   ensureAdminProfile,
   mapFirebaseError,
+  isEmailAdmin,
   listUsers,
   loadUserProfile,
   onAuthStateChanged,
@@ -111,6 +112,7 @@ export function App() {
       await fn();
     } catch (error) {
       notify(mapFirebaseError(error), 'error');
+      notify(error.message || 'Error inesperado', 'error');
     } finally {
       setTimeout(() => setBusy(false), 800);
     }
