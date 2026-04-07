@@ -2,6 +2,49 @@
 
 Aplicación migrada a React con arquitectura orientada a componentes, autenticación por usuario y panel admin.
 
+## ¿Necesito instalar Node?
+No es obligatorio.
+
+Este proyecto está hecho con **módulos ESM en navegador** y carga React/Tailwind por CDN.
+Por eso **no existe `package.json` ni `node_modules`** en esta versión.
+
+## Cómo ejecutar el programa
+> Importante: debes abrirlo con servidor HTTP (no con doble click al `index.html`).
+
+### Opción A (recomendada): Python (sin Node)
+Si tienes Python instalado:
+
+```bash
+cd /workspace/historiaClinica
+python3 -m http.server 5173
+```
+
+Luego abre:
+
+- http://localhost:5173
+
+### Opción B: Node (si prefieres usar Node)
+Si ya tienes Node instalado:
+
+```bash
+cd /workspace/historiaClinica
+npx serve -l 5173 .
+```
+
+Luego abre:
+
+- http://localhost:5173
+
+## Requisitos de Firebase
+Para que funcione completamente (auth, datos y privacidad):
+
+1. Configura en Firebase Authentication:
+   - Email/Password habilitado.
+   - Google Provider habilitado.
+2. Usa las reglas de `firestore.rules` incluidas en este repo.
+3. Asegura que el admin sea el correo:
+   - `brayuco03@gmail.com`
+
 ## Cambios principales
 - Front-end reescrito en React (sin build step, usando módulos ESM en navegador).
 - Login de usuarios por **usuario + contraseña** y registro automático.

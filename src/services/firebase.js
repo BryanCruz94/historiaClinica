@@ -45,6 +45,7 @@ const patientsCol = collection(db, 'patients');
 export const googleProvider = new GoogleAuthProvider();
 
 export const usernameToEmail = (username) => `${username}@${USER_DOMAIN}`;
+const normalizeUsername = (username) => (username || '').trim();
 
 export const formatUsernameFromName = (fullName) => {
   const cleaned = fullName
@@ -62,11 +63,12 @@ export const formatUsernameFromName = (fullName) => {
 export const isEmailAdmin = (email) => ADMIN_EMAILS.includes(email || '');
 
 export async function signInAsUser(username, password) {
-  return signInWithEmailAndPassword(auth, usernameToEmail(username), password);
+  return signInWithEmailAndPassword(auth, usernameToEmail(normalizeUsername(username)), password);
 }
 
 export async function registerUser({ fullName, username, password }) {
-  const cred = await createUserWithEmailAndPassword(auth, usernameToEmail(username), password);
+  const normalizedUsername = normalizeUsername(username);
+  const cred = await createUserWithEmailAndPassword(auth, usernameToEmail(normalizedUsername), password);
   const patientRef = await addDoc(patientsCol, {
     name: fullName,
     ownerUid: cred.user.uid,
@@ -75,7 +77,7 @@ export async function registerUser({ fullName, username, password }) {
 
   await setDoc(doc(db, 'users', cred.user.uid), {
     fullName,
-    username,
+    username: normalizedUsername,
     role: 'user',
     active: true,
     patientId: patientRef.id,
@@ -179,6 +181,22 @@ export async function createLegacyUsersForPatients() {
   }
 
   return created;
+}
+
+export function mapFirebaseError(error) {
+  const code = error?.code || '';
+  const known = {
+    'auth/operation-not-allowed': 'Email/Password no está habilitado en Firebase Authentication. Activa ese proveedor para usar login y registro de usuarios.',
+    'auth/invalid-credential': 'Usuario o contraseña incorrectos.',
+    'auth/invalid-email': 'El usuario ingresado no es válido.',
+    'auth/user-not-found': 'El usuario no existe.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/email-already-in-use': 'El nombre de usuario ya está en uso.',
+    'auth/weak-password': 'La contraseña es muy débil. Debe tener al menos 6 caracteres.',
+    'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e intenta de nuevo.',
+    'auth/network-request-failed': 'Error de red. Verifica tu conexión e inténtalo nuevamente.'
+  };
+  return known[code] || error?.message || 'Ocurrió un error inesperado.';
 }
 
 export {

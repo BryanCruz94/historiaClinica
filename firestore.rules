@@ -39,6 +39,11 @@ service cloud.firestore {
       }
 
       match /entries/{entryId} {
+        allow read: if ownPatient(patientId) || isAdmin();
+        allow create, update: if (ownPatient(patientId) || isAdmin()) &&
+          request.resource.data.type in ["appointment", "exam"] &&
+          request.resource.data.dateTime is timestamp;
+        allow delete: if ownPatient(patientId) || isAdmin();
         allow read, write: if (ownPatient(patientId) || isAdmin()) &&
           request.resource.data.type in ["appointment", "exam"];
       }
