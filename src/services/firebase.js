@@ -16,11 +16,13 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  limit,
   orderBy,
   query,
   serverTimestamp,
   setDoc,
-  updateDoc
+  updateDoc,
+  where
 } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -99,6 +101,28 @@ export async function signInAsAdminGoogle() {
 export async function loadUserProfile(uid) {
   const profileSnap = await getDoc(doc(db, 'users', uid));
   return profileSnap.exists() ? profileSnap.data() : null;
+}
+
+export async function ensureUserProfileFromPatient(user) {
+  const userRef = doc(db, 'users', user.uid);
+  const existing = await getDoc(userRef);
+  if (existing.exists()) return existing.data();
+
+  const patientSnap = await getDocs(query(patientsCol, where('ownerUid', '==', user.uid), limit(1)));
+  if (patientSnap.empty) return null;
+
+  const patientDoc = patientSnap.docs[0];
+  const fallbackUsername = (user.email || '').split('@')[0] || `user_${user.uid.slice(0, 6)}`;
+  const profile = {
+    fullName: patientDoc.data().name || user.displayName || 'Paciente',
+    username: fallbackUsername,
+    role: 'user',
+    active: true,
+    patientId: patientDoc.id,
+    createdAt: serverTimestamp()
+  };
+  await setDoc(userRef, profile);
+  return profile;
 }
 
 export async function ensureAdminProfile(user) {
@@ -194,7 +218,8 @@ export function mapFirebaseError(error) {
     'auth/email-already-in-use': 'El nombre de usuario ya está en uso.',
     'auth/weak-password': 'La contraseña es muy débil. Debe tener al menos 6 caracteres.',
     'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e intenta de nuevo.',
-    'auth/network-request-failed': 'Error de red. Verifica tu conexión e inténtalo nuevamente.'
+    'auth/network-request-failed': 'Error de red. Verifica tu conexión e inténtalo nuevamente.',
+    'permission-denied': 'No tienes permisos suficientes en Firestore. Verifica y publica las reglas de seguridad actualizadas.'
   };
   return known[code] || error?.message || 'Ocurrió un error inesperado.';
 }

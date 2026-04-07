@@ -9,8 +9,8 @@ import {
   auth,
   createLegacyUsersForPatients,
   ensureAdminProfile,
+  ensureUserProfileFromPatient,
   mapFirebaseError,
-  isEmailAdmin,
   listUsers,
   loadUserProfile,
   onAuthStateChanged,
@@ -43,6 +43,7 @@ export function App() {
   const [filters, setFilters] = useState({ from: '', to: '', clinicId: '', doctorId: '', type: '' });
   const [catalogs, setCatalogs] = useState({ clinics: [], doctors: [], companions: [] });
   const [users, setUsers] = useState([]);
+  const [autoMigrated, setAutoMigrated] = useState(false);
 
   const maps = useMemo(() => ({
     clinics: new Map(catalogs.clinics.map((x) => [x.id, x])),
@@ -65,7 +66,16 @@ export function App() {
     }
 
     await ensureAdminProfile(fbUser);
-    const p = await loadUserProfile(fbUser.uid);
+    await ensureUserProfileFromPatient(fbUser);
+
+    let p = await loadUserProfile(fbUser.uid);
+    if (!p) {
+      for (let i = 0; i < 5 && !p; i += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await ensureUserProfileFromPatient(fbUser);
+        p = await loadUserProfile(fbUser.uid);
+      }
+    }
     if (!p?.active) {
       await signOut(auth);
       notify('Tu usuario está inactivo o no existe.', 'error');
@@ -92,9 +102,21 @@ export function App() {
 
   useEffect(() => {
     if (profile?.role === 'admin') {
-      listUsers().then(setUsers);
+      (async () => {
+        const currentUsers = await listUsers();
+        setUsers(currentUsers);
+
+        if (!autoMigrated) {
+          const legacy = await createLegacyUsersForPatients();
+          if (legacy.length) {
+            notify(`Migración completada: ${legacy.map((u) => `${u.username}/123456`).join(', ')}`, 'success');
+            setUsers(await listUsers());
+          }
+          setAutoMigrated(true);
+        }
+      })();
     }
-  }, [profile?.role]);
+  }, [profile?.role, autoMigrated]);
 
   const filteredEntries = useMemo(() => entries.filter((entry) => {
     const date = entry.dateTime?.toDate?.() || new Date(entry.dateTime);
@@ -112,7 +134,6 @@ export function App() {
       await fn();
     } catch (error) {
       notify(mapFirebaseError(error), 'error');
-      notify(error.message || 'Error inesperado', 'error');
     } finally {
       setTimeout(() => setBusy(false), 800);
     }

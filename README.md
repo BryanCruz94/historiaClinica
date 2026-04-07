@@ -53,6 +53,7 @@ Para que funcione completamente (auth, datos y privacidad):
 - Panel de administración para activar/desactivar y eliminar usuarios.
 - Migración de pacientes legacy a usuarios con patrón `primerNombre + inicialApellido` y password `123456`.
 - CRUD de citas y exámenes, filtros y reporte imprimible.
+- Al entrar como admin, la app intenta auto-migrar pacientes legacy sin usuario asociado.
 
 ## Estructura
 - `src/App.js`: composición principal de componentes.

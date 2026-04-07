@@ -35,6 +35,9 @@ export function AuthView({ onUserLogin, onUserRegister, onAdminLogin, loading })
               <input className="w-full rounded border p-2" type="password" placeholder="Confirmar contraseña" value=${register.confirm} onInput=${(e) => setRegister({ ...register, confirm: e.target.value })} required />
               <button disabled=${loading} className="w-full rounded bg-emerald-600 p-2 text-white disabled:opacity-50">${loading ? 'Registrando...' : 'Crear cuenta'}</button>
             </form>`}
+        <p className="mt-3 text-xs text-slate-500">
+          Si aparece el error <strong>operation-not-allowed</strong>, habilita Email/Password en Firebase Authentication.
+        </p>
       </article>
 
       <article className="rounded-xl bg-white p-6 shadow">
