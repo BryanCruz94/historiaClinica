@@ -189,7 +189,7 @@ async function loadCatalog(name) {
   for (const it of items) maps[name].set(it.id, it);
 
   // Rellena selects del formulario
-  const fill = (sels, fmt) => sels.forEach(sel => {
+  const fill = (sels, fmt) => sels.filter(Boolean).forEach(sel => {
     const previousValue = sel.value;
     ensureOptionPrompt(sel, "Selecciona...");
     items.forEach(it => {
